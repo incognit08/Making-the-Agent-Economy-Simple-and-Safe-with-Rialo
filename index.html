@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Making the Agent Economy Simple and Safe with Rialo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #e8e3d5;
+            color: #010101;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #010101;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .disclaimer {
+            background-color: #a9ddd3;
+            border: 1px solid #a9ddd3;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            text-align: center;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 14px;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(1,1,1,0.08);
+        }
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 4px solid #a9ddd3;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .question h3 {
+            margin: 0 0 10px 0;
+            color: #010101;
+            font-weight: 500;
+            font-size: 18px;
+        }
+        .question p {
+            margin-bottom: 15px;
+            font-weight: 400;
+            color: #333;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            border: 1px solid #a9ddd3;
+            border-radius: 8px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .options li:hover:not(.revealed) {
+            background-color: #a9ddd3;
+            border-color: #88c7bf;
+            transform: translateY(-1px);
+        }
+        .options li.revealed {
+            cursor: default;
+            transform: none;
+        }
+        .options li label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+            font-weight: 400;
+        }
+        .options li input[type="radio"] {
+            margin-right: 12px;
+            accent-color: #a9ddd3;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        .options li input[type="radio"]:disabled {
+            accent-color: #ccc;
+            cursor: not-allowed;
+        }
+        .options li.correct {
+            background-color: #d4edda !important;
+            border-color: #28a745;
+        }
+        .options li.correct label {
+            font-weight: 600;
+        }
+        .options li.selected-correct {
+            background-color: #c3e6cb !important;
+            border-color: #28a745;
+        }
+        .options li.selected-wrong {
+            background-color: #f8d7da !important;
+            border-color: #dc3545;
+        }
+        .indicator {
+            font-weight: 600;
+            margin-left: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .indicator.correct {
+            background-color: #28a745;
+            color: white;
+        }
+        .indicator.incorrect {
+            background-color: #dc3545;
+            color: white;
+        }
+        button {
+            background-color: #a9ddd3;
+            color: #010101;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.2s ease;
+        }
+        button:hover:not(.submitted) {
+            background-color: #88c7bf;
+        }
+        button.submitted {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .score {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #a9ddd3 0%, #88c7bf 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(169, 221, 211, 0.3);
+        }
+        .score .obtained {
+            font-size: 24px;
+            font-weight: 700;
+            color: #010101;
+            margin-bottom: 5px;
+        }
+        .score .total {
+            font-size: 16px;
+            color: #010101;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        .score .grade {
+            font-size: 32px;
+            font-weight: 700;
+            color: #010101;
+            margin-top: 5px;
+        }
+        .results {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #a9ddd3;
+            border: 1px solid #a9ddd3;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .feedback h4 {
+            color: #010101;
+            text-align: center;
+            margin: 0;
+            font-size: 18px;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .quiz-container {
+                padding: 20px;
+            }
+            .question {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Making the Agent Economy Simple and Safe with Rialo</h1>
+    
+    <div class="disclaimer">
+        This quiz is for fun only!
+    </div>
+    
+    <div class="quiz-container">
+        <form id="quizForm">
+            <div class="question">
+                <h3>1️⃣ What is the main goal of Rialo according to Subzero Labs?</h3>
+                <p>Q: What is the main goal of Rialo according to Subzero Labs?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q1a" name="q1" value="A">
+                            A) To replace all existing blockchains
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q1b" name="q1" value="B">
+                            B) To be the best blockchain for the decentralized AI agent economy
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q1c" name="q1" value="C">
+                            C) To only focus on crypto payments
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q1d" name="q1" value="D">
+                            D) To build centralized AI platforms
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="question">
+                <h3>2️⃣ Why is Rialo considered a natural fit for AI agents?</h3>
+                <p>Q: Why is Rialo considered a natural fit for AI agents?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q2a" name="q2" value="A">
+                            A) It only supports traditional web apps
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q2b" name="q2" value="B">
+                            B) It is slower but more secure
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q2c" name="q2" value="C">
+                            C) It has native webcalls, timers, and fast execution that match agent workflows
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q2d" name="q2" value="D">
+                            D) It works only with one specific AI vendor
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="question">
+                <h3>3️⃣ What does the SCALE program help users do?</h3>
+                <p>Q: What does the SCALE program help users do?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q3a" name="q3" value="A">
+                            A) Train new AI models
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q3b" name="q3" value="B">
+                            B) Create NFTs
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q3c" name="q3" value="C">
+                            C) Pay AI agents for work safely and fairly using on-chain rules
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q3d" name="q3" value="D">
+                            D) Run social media ads
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="question">
+                <h3>4️⃣ In the SCALE process, what happens to the payment when a task starts?</h3>
+                <p>Q: In the SCALE process, what happens to the payment when a task starts?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q4a" name="q4" value="A">
+                            A) It is paid immediately to the agent
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q4b" name="q4" value="B">
+                            B) It is held off-chain until completion
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q4c" name="q4" value="C">
+                            C) It is escrowed on-chain until the task is completed or judged
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q4d" name="q4" value="D">
+                            D) It is converted into another token first
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="question">
+                <h3>5️⃣ What is the role of the third-party Judge Agent in SCALE?</h3>
+                <p>Q: What is the role of the third-party Judge Agent in SCALE?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q5a" name="q5" value="A">
+                            A) To generate the image
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q5b" name="q5" value="B">
+                            B) To evaluate whether the agent’s work meets the task requirements
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q5c" name="q5" value="C">
+                            C) To manage wallet payments
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q5d" name="q5" value="D">
+                            D) To write smart contracts
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="question">
+                <h3>6️⃣ What happens if the Image Generating Agent fails to submit work before the deadline?</h3>
+                <p>Q: What happens if the Image Generating Agent fails to submit work before the deadline?</p>
+                <ul class="options">
+                    <li>
+                        <label>
+                            <input type="radio" id="q6a" name="q6" value="A">
+                            A) The agent still gets paid
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q6b" name="q6" value="B">
+                            B) The judge agent completes the task
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q6c" name="q6" value="C">
+                            C) Rialo’s native timers automatically refund the requester
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" id="q6d" name="q6" value="D">
+                            D) The request is permanently locked
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            
+            <button type="button" id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+        </form>
+        
+        <div id="score" class="score">
+            <div class="obtained" id="obtainedScore"></div>
+            <div class="total">out of 6</div>
+            <div class="grade" id="grade"></div>
+        </div>
+        
+        <div id="results" class="results">
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        const questions = {
+            q1: { correct: 'B' },
+            q2: { correct: 'C' },
+            q3: { correct: 'C' },
+            q4: { correct: 'C' },
+            q5: { correct: 'B' },
+            q6: { correct: 'C' }
+        };
+
+        function getGrade(score) {
+            if (score === 6) return 'A+';
+            if (score >= 5) return 'A';
+            if (score >= 4) return 'B';
+            if (score >= 3) return 'C';
+            if (score >= 2) return 'D';
+            return 'F';
+        }
+
+        function submitQuiz() {
+            const form = document.getElementById('quizForm');
+            const scoreDiv = document.getElementById('score');
+            const obtainedDiv = document.getElementById('obtainedScore');
+            const gradeDiv = document.getElementById('grade');
+            const results = document.getElementById('results');
+            const submitBtn = document.getElementById('submitBtn');
+            const feedbackDiv = document.getElementById('feedback');
+
+            // Check if all questions are answered
+            let allAnswered = true;
+            let score = 0;
+            for (let i = 1; i <= 6; i++) {
+                const selected = form.querySelector(`input[name="q${i}"]:checked`);
+                if (!selected) {
+                    allAnswered = false;
+                    break;
+                }
+                if (selected.value === questions[`q${i}`].correct) {
+                    score++;
+                }
+            }
+            if (!allAnswered) {
+                alert('Please answer all questions before submitting! You can choose any answer for each question.');
+                return;
+            }
+
+            // Show score and grade under submit
+            obtainedDiv.textContent = `Obtained Score: ${score}`;
+            gradeDiv.textContent = `Grade: ${getGrade(score)}`;
+            scoreDiv.style.display = 'block';
+
+            // Reveal answers directly on the quiz
+            for (let i = 1; i <= 6; i++) {
+                const qKey = `q${i}`;
+                const correctValue = questions[qKey].correct;
+                const selected = form.querySelector(`input[name="${qKey}"]:checked`);
+                const selectedValue = selected ? selected.value : null;
+
+                // Find and style the correct option
+                const correctInput = form.querySelector(`input[name="${qKey}"][value="${correctValue}"]`);
+                const correctLi = correctInput.closest('li');
+                correctLi.classList.add('correct', 'revealed');
+
+                // Add indicator to correct
+                let correctIndicator = correctLi.querySelector('.indicator');
+                if (!correctIndicator) {
+                    correctIndicator = document.createElement('span');
+                    correctIndicator.className = 'indicator correct';
+                    correctIndicator.textContent = ' ✓ Correct';
+                    correctInput.parentElement.appendChild(correctIndicator);
+                }
+
+                // Style and indicate the selected option if different from correct
+                if (selectedValue && selectedValue !== correctValue) {
+                    const selectedLi = selected.closest('li');
+                    selectedLi.classList.add('selected-wrong', 'revealed');
+
+                    let selIndicator = selectedLi.querySelector('.indicator');
+                    if (!selIndicator) {
+                        selIndicator = document.createElement('span');
+                        selIndicator.className = 'indicator incorrect';
+                        selIndicator.textContent = ' ✗ Incorrect';
+                        selected.parentElement.appendChild(selIndicator);
+                    }
+                } else if (selectedValue === correctValue) {
+                    const selectedLi = selected.closest('li');
+                    selectedLi.classList.add('selected-correct', 'revealed');
+                }
+            }
+
+            // Disable inputs and button
+            const inputs = form.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => input.disabled = true);
+            submitBtn.classList.add('submitted');
+            submitBtn.textContent = 'Quiz Submitted!';
+
+            // Show general feedback
+            feedbackDiv.innerHTML = '<h4>Great job! Keep learning about Rialo and RWAs. Scroll up to review your answers with indicators.</h4>';
+            results.style.display = 'block';
+
+            // Scroll to the score section
+            scoreDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
