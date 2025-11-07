@@ -176,8 +176,16 @@
         .score .grade {
             font-size: 32px;
             font-weight: 700;
-            color: #010101;
             margin-top: 5px;
+        }
+        .score .grade.a {
+            color: #28a745;
+        }
+        .score .grade.b {
+            color: #fd7e14;
+        }
+        .score .grade.c {
+            color: #dc3545;
         }
         .results {
             display: none;
@@ -218,7 +226,7 @@
     <div class="quiz-container">
         <form id="quizForm">
             <div class="question">
-                <h3>1️⃣ What is the main goal of Rialo according to Subzero Labs?</h3>
+                <h3>1. What is the main goal of Rialo according to Subzero Labs?</h3>
                 <p>Q: What is the main goal of Rialo according to Subzero Labs?</p>
                 <ul class="options">
                     <li>
@@ -249,7 +257,7 @@
             </div>
             
             <div class="question">
-                <h3>2️⃣ Why is Rialo considered a natural fit for AI agents?</h3>
+                <h3>2. Why is Rialo considered a natural fit for AI agents?</h3>
                 <p>Q: Why is Rialo considered a natural fit for AI agents?</p>
                 <ul class="options">
                     <li>
@@ -280,7 +288,7 @@
             </div>
             
             <div class="question">
-                <h3>3️⃣ What does the SCALE program help users do?</h3>
+                <h3>3. What does the SCALE program help users do?</h3>
                 <p>Q: What does the SCALE program help users do?</p>
                 <ul class="options">
                     <li>
@@ -311,7 +319,7 @@
             </div>
             
             <div class="question">
-                <h3>4️⃣ In the SCALE process, what happens to the payment when a task starts?</h3>
+                <h3>4. In the SCALE process, what happens to the payment when a task starts?</h3>
                 <p>Q: In the SCALE process, what happens to the payment when a task starts?</p>
                 <ul class="options">
                     <li>
@@ -342,7 +350,7 @@
             </div>
             
             <div class="question">
-                <h3>5️⃣ What is the role of the third-party Judge Agent in SCALE?</h3>
+                <h3>5. What is the role of the third-party Judge Agent in SCALE?</h3>
                 <p>Q: What is the role of the third-party Judge Agent in SCALE?</p>
                 <ul class="options">
                     <li>
@@ -373,7 +381,7 @@
             </div>
             
             <div class="question">
-                <h3>6️⃣ What happens if the Image Generating Agent fails to submit work before the deadline?</h3>
+                <h3>6. What happens if the Image Generating Agent fails to submit work before the deadline?</h3>
                 <p>Q: What happens if the Image Generating Agent fails to submit work before the deadline?</p>
                 <ul class="options">
                     <li>
@@ -428,12 +436,9 @@
         };
 
         function getGrade(score) {
-            if (score === 6) return 'A+';
             if (score >= 5) return 'A';
-            if (score >= 4) return 'B';
-            if (score >= 3) return 'C';
-            if (score >= 2) return 'D';
-            return 'F';
+            if (score >= 3) return 'B';
+            return 'C';
         }
 
         function submitQuiz() {
@@ -465,7 +470,9 @@
 
             // Show score and grade under submit
             obtainedDiv.textContent = `Obtained Score: ${score}`;
-            gradeDiv.textContent = `Grade: ${getGrade(score)}`;
+            const grade = getGrade(score);
+            gradeDiv.textContent = `Grade: ${grade}`;
+            gradeDiv.classList.add(grade.toLowerCase());
             scoreDiv.style.display = 'block';
 
             // Reveal answers directly on the quiz
@@ -514,7 +521,7 @@
             submitBtn.textContent = 'Quiz Submitted!';
 
             // Show general feedback
-            feedbackDiv.innerHTML = '<h4>Great job! Keep learning about Rialo and RWAs. Scroll up to review your answers with indicators.</h4>';
+            feedbackDiv.innerHTML = '<h4>Great job! Keep learning about the Agent Economy with Rialo. Scroll up to review your answers with indicators.</h4>';
             results.style.display = 'block';
 
             // Scroll to the score section
